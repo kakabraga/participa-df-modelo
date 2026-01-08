@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\PedidoController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -13,6 +14,5 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [PedidoController::class, 'index'])->name('home');
+Route::post('/anallisar', [PedidoController::class, 'analisar'])->name('pedido.analisar');
