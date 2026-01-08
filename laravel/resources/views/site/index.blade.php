@@ -11,9 +11,12 @@
         <h1 class="text-xl font-bold mb-4">
             Análise de Pedido Público
         </h1>
-<div class="test-tailwind">
-    TESTE FORÇADO
-</div>
+
+@if(session('resultado'))
+    <div class="bg-green-100 text-green-700 p-3 rounded">
+        Resultado: {{ session('resultado') }}
+    </div>
+@endif
 
         {{-- Erros de validação --}}
         @if ($errors->any())

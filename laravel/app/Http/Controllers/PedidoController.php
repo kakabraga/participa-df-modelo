@@ -24,7 +24,11 @@ class PedidoController extends Controller
             return response()->json(['status' => 'limpo']);
         }
 
-        return (new Pedido)->savePedidoRegex($detecoes, $request->texto);
+        $resultado = (new Pedido)->savePedidoRegex($detecoes, $request->texto);
+
+        return redirect()
+            ->route('home')
+            ->with('resultado', $resultado);
     }
 
     public function detectarCpf(string $texto): array
