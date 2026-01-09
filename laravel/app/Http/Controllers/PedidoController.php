@@ -11,20 +11,37 @@ class PedidoController extends Controller
         return view('site.index');
     }
 
-    public function analisar(Request $request)
+    public function analisarTexto(Request $request)
     {
-        $request->validate([
-            'texto' => 'required|string|min:10'
-        ]);
 
-        $texto = $request->texto;
-        $detecoes = $this->detectarRegex($texto);
+        dd($request);
+        // $request->validate([
+        //     'texto' => 'required|string|min:10'
+        // ]);
 
+        // $texto = $request->texto;
+        // $detecoes = $this->detectarRegex($texto);
+
+        // if (empty($detecoes)) {
+        //     return response()->json(['status' => 'limpo']);
+        // }
+
+        // $resultado = (new Pedido)->savePedidoRegex($detecoes, $request->texto);
+
+        // return redirect()
+        //     ->route('home')
+        //     ->with('resultado', $resultado);
+    }
+    public function analisarArquivoTexto(String $conteudo)
+    {
+        $detecoes = $this->detectarRegex($conteudo);
+        $resultado = new Pedido;
         if (empty($detecoes)) {
+           $resultado->savePedidoRegexArquivo($conteudo);
             return response()->json(['status' => 'limpo']);
         }
 
-        $resultado = (new Pedido)->savePedidoRegex($detecoes, $request->texto);
+        $resultado->savePedidoRegex($detecoes, $conteudo);
 
         return redirect()
             ->route('home')

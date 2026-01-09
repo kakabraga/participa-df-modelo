@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\ImportacaoPedidoController;
 use App\Http\Controllers\PedidoController;
 use Illuminate\Support\Facades\Route;
 
@@ -15,4 +16,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [PedidoController::class, 'index'])->name('home');
-Route::post('/anallisar', [PedidoController::class, 'analisar'])->name('pedido.analisar');
+Route::post('/anallisar', [ImportacaoPedidoController::class, 'store'])->name('pedido.analisar');

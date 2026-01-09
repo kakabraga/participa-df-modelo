@@ -14,9 +14,10 @@ class Pedido extends Model
         'resultado',
         'origem',
         'confianca',
+        'tipo_dado'
 
     ];
-    public function savePedidoRegex(array $detecoes, string $texto)
+    public function savePedidoRegex(array $detecoes, string $texto): Model|Pedido
     {
         return self::create([
             'hash_texto' => hash('sha256', $texto),
@@ -24,6 +25,16 @@ class Pedido extends Model
             'origem' => 'regex',
             'confianca' => 1.0,
             'tipo_dado' => implode(',', $tiposDetectados = array_column($detecoes, 'tipo'))
+        ]);
+    }
+    public function savePedidoRegexArquivo(string $texto): Model|Pedido
+    {
+        return self::create([
+            'hash_texto' => hash('sha256', $texto),
+            'resultado' => 'Limpo',
+            'origem' => 'regex',
+            'confianca' => 1.0,
+            'tipo_dado' => null
         ]);
     }
 }
