@@ -35,14 +35,11 @@ class PedidoController extends Controller
     public function analisarArquivoTexto(String $conteudo)
     {
         $detecoes = $this->detectarRegex($conteudo);
-        $resultado = new Pedido;
+        $pedido = new Pedido;
         if (empty($detecoes)) {
-           $resultado->savePedidoRegexArquivo($conteudo);
-            return response()->json(['status' => 'limpo']);
+           $pedido->savePedidoRegexArquivo($conteudo);
+           $resultado = "Não existem informações pessoais no arquivo!";
         }
-
-        $resultado->savePedidoRegex($detecoes, $conteudo);
-
         return redirect()
             ->route('home')
             ->with('resultado', $resultado);
