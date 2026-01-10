@@ -4,105 +4,56 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Pedido;
+use App\Services\PedidoService;
+use App\Http\Controllers\ImportacaoPedidoController;
+use App\Services\ImportacaoService;
+
 class PedidoController extends Controller
 {
+    private $pedidoService;
+    private $importacaoService;
+    public function __construct(PedidoService $pedidoService, ImportacaoService $importacaoService)
+    {
+        $this->pedidoService = $pedidoService;
+        $this->importacaoService = $importacaoService;
+    }
     public function index()
     {
         return view('site.index');
     }
 
-    public function analisarTexto(Request $request)
+    public function storeTexto(Request $request)
     {
-
-        dd($request);
-        // $request->validate([
-        //     'texto' => 'required|string|min:10'
-        // ]);
-
-        // $texto = $request->texto;
-        // $detecoes = $this->detectarRegex($texto);
-
-        // if (empty($detecoes)) {
-        //     return response()->json(['status' => 'limpo']);
-        // }
-
-        // $resultado = (new Pedido)->savePedidoRegex($detecoes, $request->texto);
-
-        // return redirect()
-        //     ->route('home')
-        //     ->with('resultado', $resultado);
+        $input = $this->prepararInput($request);
+        $pedido = $this->pedidoService->analisarTexto($input['texto'], $input['isArquivo']);
+        return redirect()->route('home')->with('resultado', $pedido);
     }
-    public function analisarArquivoTexto(String $conteudo)
+
+    public function prepararInput(Request $request)
     {
-        $detecoes = $this->detectarRegex($conteudo);
-        $pedido = new Pedido;
-        if (empty($detecoes)) {
-           $pedido->savePedidoRegexArquivo($conteudo);
-           $resultado = "Não existem informações pessoais no arquivo!";
+        if ($request->hasFile('arquivo')) {
+            return $this->getInputArquivo($request);
         }
-        return redirect()
-            ->route('home')
-            ->with('resultado', $resultado);
-    }
-
-    public function detectarCpf(string $texto): array
-    {
-        preg_match_all(
-            '/\b\d{3}\.\d{3}\.\d{3}\-\d{2}\b|\b\d{11}\b/',
-            $texto,
-            $matches
-        );
-
-        return $matches[0];
-    }
-
-    private function detectarTelefone(string $texto): array
-    {
-        preg_match_all(
-            '/\(\d{2}\)\s?\d{4,5}\-\d{4}/',
-            $texto,
-            $matches
-        );
-        return $matches[0];
-    }
-
-    private function detectarEmail(string $texto): array
-    {
-        preg_match_all(
-            '/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i',
-            $texto,
-            $matches
-        );
-
-        return $matches[0];
-    }
-
-    private function detectarRegex($texto): array
-    {
-        $detecoes = [];
-
-        if ($cpf = $this->detectarCpf($texto)) {
-            $detecoes[] = [
-                'tipo' => 'CPF',
-                'quantidade' => count($cpf)
-            ];
+        if ($request->filled('texto')) {
+            return $this->getInputTexto($request);
         }
-
-        if ($email = $this->detectarEmail($texto)) {
-            $detecoes[] = [
-                'tipo' => 'EMAIL',
-                'quantidade' => count($email)
-            ];
-        }
-
-        if ($telefone = $this->detectarTelefone($texto)) {
-            $detecoes[] = [
-                'tipo' => 'TELEFONE',
-                'quantidade' => count($telefone)
-            ];
-        }
-
-        return $detecoes;
+        return [
+            'texto' => '',
+            'isArquivo' => false
+        ];
     }
-
+    public function getInputArquivo(Request $request)
+    {
+        return [
+            'texto' => $this->importacaoService->processaArquivo($request->file('arquivo')),
+            'isArquivo' => true
+        ];
+    }
+    public function getInputTexto(Request $request)
+    {
+        return [
+            'texto' => $request->input('texto'),
+            'isArquivo' => false
+        ];
+    }
 }

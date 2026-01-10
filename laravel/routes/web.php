@@ -16,4 +16,4 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [PedidoController::class, 'index'])->name('home');
-Route::post('/anallisar', [ImportacaoPedidoController::class, 'store'])->name('pedido.analisar');
+Route::post('/anallisar', [PedidoController::class, 'storeTexto'])->name('pedido.analisar');

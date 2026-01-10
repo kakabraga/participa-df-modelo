@@ -14,27 +14,31 @@ class Pedido extends Model
         'resultado',
         'origem',
         'confianca',
-        'tipo_dado'
-
+        'tipo_dado',
+        'arquivo'
     ];
-    public function savePedidoRegex(array $detecoes, string $texto): Model|Pedido
-    {
-        return self::create([
-            'hash_texto' => hash('sha256', $texto),
-            'resultado' => 'dados_pessoais_detectados',
-            'origem' => 'regex',
-            'confianca' => 1.0,
-            'tipo_dado' => implode(',', $tiposDetectados = array_column($detecoes, 'tipo'))
-        ]);
-    }
-    public function savePedidoRegexArquivo(string $texto): Model|Pedido
+
+    public static function criarLimpo(string $texto, bool $isArquivo = false): self
     {
         return self::create([
             'hash_texto' => hash('sha256', $texto),
             'resultado' => 'Limpo',
             'origem' => 'regex',
             'confianca' => 1.0,
-            'tipo_dado' => null
+            'tipo_dado' => null,
+            'arquivo' => $isArquivo
+        ]);
+    }
+
+    public static function criarComDeteccoes(array $detecoes, string $texto, bool $isArquivo = false): self
+    {
+        return self::create([
+            'hash_texto' => hash('sha256', $texto),
+            'resultado' => 'Detectado',
+            'origem' => 'regex',
+            'confianca' => 0.8,
+            'tipo_dado' => json_encode($detecoes),
+            'arquivo' => $isArquivo
         ]);
     }
 }
