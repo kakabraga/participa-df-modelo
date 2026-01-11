@@ -17,6 +17,7 @@
         @if(session('resultado'))
             <div class="bg-green-100 text-green-700 p-3 rounded">
                 Resultado: {{ session('resultado') }}
+                <br>
             </div>
         @endif
 

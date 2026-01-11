@@ -3,78 +3,55 @@
 namespace App\Services;
 
 use App\Models\Pedido;
+use App\Support\RegexPatterns;
+use App\Services\ContextDetectorService;
 
 class PedidoService
 {
+    private $contextDetectorService;
+
+    public function __construct(ContextDetectorService $contextDetectorService)
+    {
+        $this->contextDetectorService = $contextDetectorService;
+    }
+
     public function analisarTexto(string $texto, bool $isArquivo = false): Pedido
     {
-        $detecoes = $this->detectarRegex($texto);
-
-        if (empty($detecoes)) {
-            return Pedido::criarLimpo($texto, $isArquivo);
+        $detecoes_regex = $this->detectarRegex($texto);
+        $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($texto);
+        if (!empty($detecoes_regex)) {
+            return Pedido::criarComDeteccoes($detecoes_regex, $texto, $isArquivo);
         }
-
-        return Pedido::criarComDeteccoes($detecoes, $texto, $isArquivo);
+        if (!empty($detecoes_contexto)) {
+            return Pedido::criarComDeteccoes($detecoes_contexto, $texto, $isArquivo);
+        }
+        return Pedido::criarLimpo($texto, $isArquivo);
     }
     private function detectarRegex($texto): array
     {
         $detecoes = [];
 
-        if ($cpf = $this->detectarCpf($texto)) {
+        if (preg_match(RegexPatterns::CPF, $texto)) {
             $detecoes[] = [
                 'tipo' => 'CPF',
-                'quantidade' => count($cpf)
+                'origem' => 'Regex'
             ];
         }
 
-        if ($email = $this->detectarEmail($texto)) {
+        if (preg_match(RegexPatterns::EMAIL, $texto)) {
             $detecoes[] = [
                 'tipo' => 'EMAIL',
-                'quantidade' => count($email)
+                'origem' => 'Regex',
             ];
         }
 
-        if ($telefone = $this->detectarTelefone($texto)) {
+        if (preg_match(RegexPatterns::TELEFONE, $texto)) {
             $detecoes[] = [
                 'tipo' => 'TELEFONE',
-                'quantidade' => count($telefone)
+                'origem' => 'Regex',
             ];
         }
 
         return $detecoes;
-    }
-
-    
-
-    public function detectarCpf(string $texto): array
-    {
-        preg_match_all(
-            '/\b\d{3}\.\d{3}\.\d{3}\-\d{2}\b|\b\d{11}\b/',
-            $texto,
-            $matches
-        );
-
-        return $matches[0];
-    }
-
-    private function detectarTelefone(string $texto): array
-    {
-        preg_match_all(
-            '/\(\d{2}\)\s?\d{4,5}\-\d{4}/',
-            $texto,
-            $matches
-        );
-        return $matches[0];
-    }
-
-    private function detectarEmail(string $texto): array
-    {
-        preg_match_all(
-            '/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i',
-            $texto,
-            $matches
-        );
-
-        return $matches[0];
     }
 }

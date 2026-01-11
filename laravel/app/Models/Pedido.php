@@ -35,10 +35,11 @@ class Pedido extends Model
         return self::create([
             'hash_texto' => hash('sha256', $texto),
             'resultado' => 'Detectado',
-            'origem' => 'regex',
+            'origem' => $detecoes[0]['origem'],
             'confianca' => 0.8,
-            'tipo_dado' => json_encode($detecoes),
+            'tipo_dado' => $detecoes[0]['tipo_dado'],
             'arquivo' => $isArquivo
         ]);
     }
 }
+// Undefined array key "origem"

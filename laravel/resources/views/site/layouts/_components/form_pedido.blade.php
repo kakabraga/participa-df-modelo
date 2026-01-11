@@ -15,7 +15,7 @@
         <label class="block font-semibold mb-1">
             Ou envie um arquivo (.txt)
         </label>
-        <input type="file" name="arquivo" accept=".txt" class="w-full border rounded p-2">
+        <input type="file" name="arquivo" accept=".txt, .jpg, .jpeg, .mp3" class="w-full border rounded p-2">
     </div>
 
     <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700">

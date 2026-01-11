@@ -26,7 +26,8 @@ class PedidoController extends Controller
     {
         $input = $this->prepararInput($request);
         $pedido = $this->pedidoService->analisarTexto($input['texto'], $input['isArquivo']);
-        return redirect()->route('home')->with('resultado', $pedido);
+        $message = $pedido->resultado != 'Limpo' ? 'Texto contém informações pessoais!' : 'Texto não contém informações pessoais!';
+        return redirect()->route('home')->with('resultado', $message);
     }
 
     public function prepararInput(Request $request)
