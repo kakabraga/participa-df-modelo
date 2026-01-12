@@ -45,17 +45,9 @@ class OcrService
     private function normalizarTexto(string $texto): string
     {
         $texto = mb_convert_encoding($texto, 'UTF-8', 'UTF-8');
-
-        // 2️⃣ Remove caracteres "lixo" que não são letras, números ou pontuação básica
         $texto = preg_replace('/[^\p{L}\p{N}\s\.\,\-\:\;]/u', '', $texto);
-
-        // 3️⃣ Substitui múltiplos espaços por um único espaço
         $texto = preg_replace('/\s+/', ' ', $texto);
-
-        // 4️⃣ Quebra linhas entre comandos ou frases mais longas
         $texto = preg_replace('/(\.|\;|\:)/', "$1\n", $texto);
-
-        // 5️⃣ Trim para remover espaços no início/fim
         $texto = trim($texto);
 
         return $texto;

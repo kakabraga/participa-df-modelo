@@ -5,27 +5,26 @@ namespace App\Services;
 use App\Models\Pedido;
 use App\Support\RegexPatterns;
 use App\Services\ContextDetectorService;
-
+use App\Services\ClassificadorService;
 class PedidoService
 {
     private $contextDetectorService;
-
-    public function __construct(ContextDetectorService $contextDetectorService)
+    private $classificadorService;
+    public function __construct(ContextDetectorService $contextDetectorService, ClassificadorService $classificadorService)
     {
         $this->contextDetectorService = $contextDetectorService;
+        $this->classificadorService   = $classificadorService;
     }
 
     public function analisarTexto(array $input): Pedido
     {
         $detecoes_regex = $this->detectarRegex($input['texto']);
-        $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
-        if (!empty($detecoes_regex)) {
-            return Pedido::criarComDeteccoes($detecoes_regex, $input);
+        $detecoes_contexto = [];
+        if(empty($detecoes_regex)) {
+            $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
         }
-        if (!empty($detecoes_contexto)) {
-            return Pedido::criarComDeteccoes($detecoes_contexto, $input);
-        }
-        return Pedido::criarLimpo($input);
+        $decisao = $this->classificadorService->decidir($detecoes_regex, $detecoes_contexto);
+        return Pedido::criar($input, $decisao);
     }
     private function detectarRegex($texto): array
     {
