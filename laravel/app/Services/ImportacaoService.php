@@ -5,6 +5,7 @@ namespace App\Services;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
+use App\Services\OcrService;
 
 class ImportacaoService
 {
@@ -25,8 +26,15 @@ class ImportacaoService
         return file_get_contents($arquivo->getRealPath());
     }
 
-    public function processaArquivo(UploadedFile  $arquivo) {
+    public function processaArquivoTexto(UploadedFile  $arquivo)
+    {
         $this->validaArquivo($arquivo);
         return $this->pegaTexto($arquivo);
+    }
+
+    public function processaArquivoImagem(UploadedFile  $arquivo)
+    {
+        $ocrService = new OcrService();
+        return $ocrService->extrairTexto($arquivo);
     }
 }

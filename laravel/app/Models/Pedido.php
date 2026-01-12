@@ -15,30 +15,33 @@ class Pedido extends Model
         'origem',
         'confianca',
         'tipo_dado',
-        'arquivo'
+        'arquivo',
+        'tipo_arquivo'
     ];
 
-    public static function criarLimpo(string $texto, bool $isArquivo = false): self
+    public static function criarLimpo(array $input): self
     {
         return self::create([
-            'hash_texto' => hash('sha256', $texto),
+            'hash_texto' => hash('sha256', $input["texto"]),
             'resultado' => 'Limpo',
             'origem' => 'regex',
             'confianca' => 1.0,
             'tipo_dado' => null,
-            'arquivo' => $isArquivo
+            'arquivo' => $input["isArquivo"],
+            'tipo_arquivo' => $input['tipo_arquivo'] ?? null
         ]);
     }
 
-    public static function criarComDeteccoes(array $detecoes, string $texto, bool $isArquivo = false): self
+    public static function criarComDeteccoes(array $detecoes, $input): self
     {
         return self::create([
-            'hash_texto' => hash('sha256', $texto),
+            'hash_texto' => hash('sha256', $input['texto']),
             'resultado' => 'Detectado',
             'origem' => $detecoes[0]['origem'],
             'confianca' => 0.8,
             'tipo_dado' => $detecoes[0]['tipo_dado'],
-            'arquivo' => $isArquivo
+            'arquivo' => $input['isArquivo'],
+            'tipo_arquivo' => $input['tipo_arquivo'] ?? null
         ]);
     }
 }

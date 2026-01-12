@@ -7,6 +7,7 @@ use App\Models\Pedido;
 use App\Services\PedidoService;
 use App\Http\Controllers\ImportacaoPedidoController;
 use App\Services\ImportacaoService;
+use App\Services\OcrService;
 
 class PedidoController extends Controller
 {
@@ -25,7 +26,7 @@ class PedidoController extends Controller
     public function storeTexto(Request $request)
     {
         $input = $this->prepararInput($request);
-        $pedido = $this->pedidoService->analisarTexto($input['texto'], $input['isArquivo']);
+        $pedido = $this->pedidoService->analisarTexto($input);
         $message = $pedido->resultado != 'Limpo' ? 'Texto contém informações pessoais!' : 'Texto não contém informações pessoais!';
         return redirect()->route('home')->with('resultado', $message);
     }
@@ -33,7 +34,7 @@ class PedidoController extends Controller
     public function prepararInput(Request $request)
     {
         if ($request->hasFile('arquivo')) {
-            return $this->getInputArquivo($request);
+            return $this->processaInputArquivo($request);
         }
         if ($request->filled('texto')) {
             return $this->getInputTexto($request);
@@ -43,11 +44,32 @@ class PedidoController extends Controller
             'isArquivo' => false
         ];
     }
-    public function getInputArquivo(Request $request)
+
+    public function processaInputArquivo(Request $request)
+    {
+        $extension = $request->arquivo->extension();
+        if($extension == 'txt') {
+            return $this->getInputArquivoTexto($request, $extension);
+        }
+
+        if (in_array($extension, ['jpg', 'jpeg'])) {
+            return $this->getInputArquivoImagem($request, $extension);
+        }
+    }
+    public function getInputArquivoTexto(Request $request, string $extension)
     {
         return [
-            'texto' => $this->importacaoService->processaArquivo($request->file('arquivo')),
-            'isArquivo' => true
+            'texto' => $this->importacaoService->processaArquivoTexto($request->file('arquivo')),
+            'isArquivo' => true,
+            'tipo_arquivo' => $extension
+        ];
+    }
+    public function getInputArquivoImagem(Request $request,  string $extension)
+    {
+        return [
+            'texto' => $this->importacaoService->processaArquivoImagem($request->file('arquivo')),
+            'isArquivo' => true,
+            'tipo_arquivo' => $extension
         ];
     }
     public function getInputTexto(Request $request)
