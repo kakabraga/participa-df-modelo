@@ -2,8 +2,8 @@
 
 use App\Http\Controllers\ImportacaoPedidoController;
 use App\Http\Controllers\PedidoController;
+use App\Http\Controllers\PythonController;
 use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -17,6 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PedidoController::class, 'index'])->name('home');
 Route::post('/anallisar', [PedidoController::class, 'storeTexto'])->name('pedido.analisar');
+Route::get('/python', [PythonController::class, 'testePython'])->name('app.python');
 // Route::get('/teste-ocr', function () {
 //     $ocr = app(\App\Services\OcrService::class);
 //     return nl2br($ocr->extrairTexto(storage_path('app/teste.jpg')));
