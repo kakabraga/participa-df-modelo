@@ -23,7 +23,7 @@ class PedidoService
         $this->analiseMidiaService    = $analiseMidiaService;
     }
 
-    public function analisarTexto(array $input): Pedido
+    public function analisarTexto(array $input, $request): Pedido
     {
         $detecoes_regex = $this->detectarRegex($input['texto']);
         $detecoes_contexto = [];
@@ -32,7 +32,7 @@ class PedidoService
         }
         $decisao = $this->classificadorService->decidir($detecoes_regex, $detecoes_contexto);
         if($decisao->resultado != 'Limpo' && $input['isArquivo']) {
-            $decisao = $this->analiseMidiaService->analisarArquivo($input);
+            $decisao = $this->analiseMidiaService->analisarArquivo($input, $request->arquivo);
         }
         return Pedido::criar($input, $decisao);
     }
