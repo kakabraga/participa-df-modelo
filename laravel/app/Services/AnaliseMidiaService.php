@@ -9,21 +9,16 @@ class AnaliseMidiaService
     ) {
     }
 
-    public function analisarArquivo(array $input)
+    public function analisarArquivo(array $input, $arquivo)
     {
-        // $file = $request->file('arquivo');
+        $args = [
+            '--file=' . $arquivo,
+            '--type=' . $input['tipo_arquivo'],
+            '--pedido-id=' . 1234,
+        ];
 
-        // $path = $file->store('uploads_temp');
+        $resultado = $this->pythonRunner->run($args);
 
-        // $fullPath = storage_path('app/' . $path);
-        // $args = [
-        //     '--file=' . $input['path'],
-        //     '--type=' . $input['tipo_arquivo'],
-        //     '--pedido-id=' . $input['pedido_id'],
-        // ];
-
-        // $resultado = $this->pythonRunner->run($args);
-
-        dd($input);
+        dd($resultado);
     }
 }

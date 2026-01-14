@@ -26,7 +26,7 @@ class PedidoController extends Controller
     public function storeTexto(Request $request)
     {
         $input = $this->prepararInput($request);
-        $pedido = $this->pedidoService->analisarTexto($input);
+        $pedido = $this->pedidoService->analisarTexto($input, $request);
         $message = $pedido->resultado != 'Limpo' ? 'Texto contém informações pessoais!' : 'Texto não contém informações pessoais!';
         return redirect()->route('home')->with('resultado', $message);
     }
