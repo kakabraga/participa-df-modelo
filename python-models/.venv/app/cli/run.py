@@ -7,7 +7,7 @@ def main():
     parser = argparse.ArgumentParser(description="Processador de arquivos")
 
     parser.add_argument("--file", required=True)
-    parser.add_argument("--type", required=True, choices=["image", "video"])
+    parser.add_argument("--type", required=True, choices=["txt", "jpg"])
     parser.add_argument("--pedido-id", required=True)
 
     args = parser.parse_args()
@@ -24,7 +24,8 @@ def main():
         "status": "ok",
         "pedido_id": args.pedido_id,
         "file": args.file,
-        "type": args.type
+        "type": args.type,
+        "descricao": parser.description
     }
 
     print(json.dumps(response))
