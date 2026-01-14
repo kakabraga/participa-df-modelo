@@ -44,7 +44,6 @@ class PedidoController extends Controller
             'isArquivo' => false
         ];
     }
-
     public function processaInputArquivo(Request $request)
     {
         $extension = $request->arquivo->extension();

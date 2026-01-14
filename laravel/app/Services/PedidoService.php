@@ -6,14 +6,21 @@ use App\Models\Pedido;
 use App\Support\RegexPatterns;
 use App\Services\ContextDetectorService;
 use App\Services\ClassificadorService;
+use App\Services\AnaliseMidiaService;
 class PedidoService
 {
     private $contextDetectorService;
     private $classificadorService;
-    public function __construct(ContextDetectorService $contextDetectorService, ClassificadorService $classificadorService)
+    private $analiseMidiaService;
+    public function __construct(
+        ContextDetectorService $contextDetectorService, 
+        ClassificadorService $classificadorService, 
+        AnaliseMidiaService $analiseMidiaService
+    )
     {
         $this->contextDetectorService = $contextDetectorService;
         $this->classificadorService   = $classificadorService;
+        $this->analiseMidiaService    = $analiseMidiaService;
     }
 
     public function analisarTexto(array $input): Pedido
@@ -24,6 +31,9 @@ class PedidoService
             $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
         }
         $decisao = $this->classificadorService->decidir($detecoes_regex, $detecoes_contexto);
+        if($decisao->resultado != 'Limpo' && $input['isArquivo']) {
+            $decisao = $this->analiseMidiaService->analisarArquivo($input);
+        }
         return Pedido::criar($input, $decisao);
     }
     private function detectarRegex($texto): array

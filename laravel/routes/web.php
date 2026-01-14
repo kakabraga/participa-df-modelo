@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PedidoController::class, 'index'])->name('home');
 Route::post('/anallisar', [PedidoController::class, 'storeTexto'])->name('pedido.analisar');
-Route::get('/python', [PythonController::class, 'testePython'])->name('app.python');
+Route::post('/python', [PythonController::class, 'store'])->name('app.python');
 // Route::get('/teste-ocr', function () {
 //     $ocr = app(\App\Services\OcrService::class);
 //     return nl2br($ocr->extrairTexto(storage_path('app/teste.jpg')));

@@ -11,6 +11,27 @@ class PythonController extends Controller
     {
         $saida = $python->run();
 
-        return json_encode($saida);
+        return json_decode($saida);
     }
+
+    public function store(Request $request, PythonRunner $python)
+    {
+        $file = $request->file('arquivo');
+
+        $path = $file->store('uploads_temp');
+
+        $fullPath = storage_path('app/' . $path);
+
+        $saida = $python->run([
+            '--file',
+            $fullPath,
+            '--type',
+            'image',
+            '--pedido-id',
+            123
+        ]);
+
+        dd($saida);
+    }
+
 }
