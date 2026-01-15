@@ -13,26 +13,27 @@ class PedidoService
     private $classificadorService;
     private $analiseMidiaService;
     public function __construct(
-        ContextDetectorService $contextDetectorService, 
-        ClassificadorService $classificadorService, 
+        ContextDetectorService $contextDetectorService,
+        ClassificadorService $classificadorService,
         AnaliseMidiaService $analiseMidiaService
-    )
-    {
+    ) {
         $this->contextDetectorService = $contextDetectorService;
-        $this->classificadorService   = $classificadorService;
-        $this->analiseMidiaService    = $analiseMidiaService;
+        $this->classificadorService = $classificadorService;
+        $this->analiseMidiaService = $analiseMidiaService;
     }
 
-    public function analisarTexto(array $input, $request): Pedido
+    public function analisarTexto(array $input): Pedido
     {
         $detecoes_regex = $this->detectarRegex($input['texto']);
         $detecoes_contexto = [];
-        if(empty($detecoes_regex)) {
+        
+        if (empty($detecoes_regex)) {
             $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
         }
-        $decisao = $this->classificadorService->decidir($detecoes_regex, $detecoes_contexto);
-        if($decisao->resultado != 'Limpo' && $input['isArquivo']) {
-            $decisao = $this->analiseMidiaService->analisarArquivo($input, $request->arquivo);
+
+        $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto);
+        if ($decisao->resultado != 'Limpo' && $input['isArquivo']) {
+            $decisao = $this->analiseMidiaService->analisarArquivo($input);
         }
         return Pedido::criar($input, $decisao);
     }
