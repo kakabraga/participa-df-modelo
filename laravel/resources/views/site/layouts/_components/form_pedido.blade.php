@@ -1,4 +1,4 @@
-<form method="POST" action="{{ route('pedido.analisar') }}" enctype="multipart/form-data">
+<form method="POST" action="{{ route('app.python') }}" enctype="multipart/form-data">
     @csrf
 
     {{-- Texto manual --}}

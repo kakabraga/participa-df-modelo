@@ -5,7 +5,7 @@ use App\DTO\DecisaoPedidoDTO;
 class ClassificadorService
 {
 
-    public function decidir(array $regex, array $contexto): DecisaoPedidoDTO
+    public function decide(array $regex, array $contexto): DecisaoPedidoDTO
     {
         if (!empty($regex)) {
             return $this->processaDecisaoRegex($regex);

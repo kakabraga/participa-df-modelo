@@ -27,13 +27,13 @@ class PythonRunner
 
     public function run(array $args = []): array
     {
+
         $command = $this->criaComandoBase($args);
         $process = $this->iniciaProcesso($command);
-
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
-        
+
         return json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
 
     }

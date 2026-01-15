@@ -16,7 +16,7 @@ class AnaliseMidiaService
             '--type=' . $input['tipo_arquivo'],
             '--pedido-id=' . 1234,
         ];
-
+        
         $resultado = $this->pythonRunner->run($args);
 
         dd($resultado);

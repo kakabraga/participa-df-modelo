@@ -17,21 +17,22 @@ class PythonController extends Controller
     public function store(Request $request, PythonRunner $python)
     {
         $file = $request->file('arquivo');
-
         $path = $file->store('uploads_temp');
 
         $fullPath = storage_path('app/' . $path);
 
         $saida = $python->run([
-            '--file',
+            "--file",
             $fullPath,
-            '--type',
-            'image',
-            '--pedido-id',
+            "--type",
+            $file->extension(),
+            "--pedido-id",
             123
         ]);
 
-        dd($saida);
+
+        return response()->json($saida);
+
     }
 
 }
