@@ -31,17 +31,17 @@ class PythonRunner
         $command = $this->criaComandoBase($args);
         $process = $this->iniciaProcesso($command);
         if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+            $this->capturaErrosPython($process);
         }
 
-        return json_decode($process->getOutput(), true, flags: JSON_THROW_ON_ERROR);
+        return $this->parseOutput($process->getOutput());
 
     }
 
     protected function iniciaProcesso(array $command): Process
     {
         $process = new Process($command, base_path('../python-models'));
-        $process->setTimeout(120);
+        $process->setTimeout(600);
         $process->run();
 
         return $process;
@@ -57,5 +57,26 @@ class PythonRunner
             ],
             $args
         );
+    }
+    protected function capturaErrosPython($process)
+    {
+        $error = $process->getErrorOutput();
+        \Log::error('Python Error', [
+            'stderr' => $error,
+            'stdout' => $process->getOutput(),
+            'exit_code' => $process->getExitCode()
+        ]);
+        throw new ProcessFailedException($process);
+
+    }
+    protected function parseOutput(string $output): array
+    {
+        $output = trim($output);
+
+        if (preg_match('/\{.*\}/s', $output, $matches)) {
+            $output = $matches[0];
+        }
+
+        return json_decode($output, true, flags: JSON_THROW_ON_ERROR);
     }
 }
