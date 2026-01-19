@@ -1,70 +1,63 @@
 import argparse
 import json
-import os
 import sys
 
 from app.pipelines.image_pipeline import ImagePipeline
+from app.pipelines.audio_pipeline import AudioPipeline
+from app.pipelines.video_pipeline import VideoPipeline
+from app.core.result import Result
 
-def main():
-    parser = argparse.ArgumentParser(description="Processador de arquivos")  
-    args   = montaParse(parser)
-    pipeline = implementaPipelinePorTipoArquivo(args.type)
-    result = pipeline.processar(file_path=args.file)
 
-    print(json.dumps(result.to_dict()))
-
-def montaRespostaPositiva(args, parser):
-     return  {
-        "status": "ok",
-        "pedido_id": args.pedido_id,
-        "file": args.file,
-        "type": args.type,
-        "descricao": parser.description
-    }
-     
-def montaResultado(args, parser):
-     return 
-
-def montaParse(parser): 
-    parser.add_argument("--file", required=True)
-    parser.add_argument("--type", required=True, choices=montaChoices())
-    parser.add_argument("--pedido-id", required=True)
-    args = parser.parse_args()
-    return args
-
-def montaChoices():
-    return [
-        "jpg",
-        "jpeg",
-        "mp3",
-        "mp4"
-    ]
-    
 IMAGE_TYPES = ["jpg", "jpeg"]
 AUDIO_TYPES = ["mp3"]
 VIDEO_TYPES = ["mp4"]
 
-def implementaPipelinePorTipoArquivo(tipo):
+
+def main():
+    parser = argparse.ArgumentParser(description="Processador de arquivos")
+    args = montaParse(parser)
+
+    pipeline = resolvePipeline(args.type)
+
+    if pipeline is None:
+        print(json.dumps({
+            "status": "error",
+            "message": "Pipeline não implementado",
+            "tipo_arquivo": args.type
+        }))
+        sys.exit(1)
+
+    result = pipeline.processar(file_path=args.file)
+
+    print(json.dumps(result))
+
+
+def montaParse(parser):
+    parser.add_argument("--file", required=True)
+    parser.add_argument("--type", required=True, choices=montaChoices())
+    parser.add_argument("--pedido-id", required=True)
+    return parser.parse_args()
+
+
+def montaChoices():
+    return IMAGE_TYPES + AUDIO_TYPES + VIDEO_TYPES + ["txt"]
+
+
+def resolvePipeline(tipo):
     if tipo in IMAGE_TYPES:
-        return implementaPipelinePorImagem(tipo)
+        return ImagePipeline()
 
     if tipo in AUDIO_TYPES:
-        return implementaPipelinePorAudio(tipo)
+        return AudioPipeline()
 
     if tipo in VIDEO_TYPES:
-        return implementaPipelinePorVideo(tipo)
-
-    return montaMensagemDeErrorPipeline(tipo)
-
-
-def montaMensagemDeErrorPipeline(tipo):
-    return {
-        "status": "error",
-        "message": "Pipeline não implementado",
-        "tipo_arquivo": tipo
-    }
+        return VideoPipeline()
     
-def implementePipelinePorImagem():
-    return ImagePipeline(type)
+    if tipo in ["txt"]:
+        return ImagePipeline()
+
+    return None
+
+
 if __name__ == "__main__":
     main()
