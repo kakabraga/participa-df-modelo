@@ -34,7 +34,7 @@ class PythonRunner
         //     $this->capturaErrosPython($process);
         // }
 
-        dd($process->getErrorOutput());
+        dd($process->getOutput());
 
         return $this->parseOutput($process->getOutput());
 

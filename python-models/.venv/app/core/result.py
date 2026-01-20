@@ -1,6 +1,4 @@
 from typing import Optional, List
-
-
 class Result:
     def __init__(
         self,

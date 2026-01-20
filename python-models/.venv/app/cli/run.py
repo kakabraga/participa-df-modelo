@@ -28,8 +28,8 @@ def main():
         sys.exit(1)
 
     result = pipeline.processar(file_path=args.file)
+    print(json.dumps(result.to_dict()))
 
-    print(json.dumps(result))
 
 
 def montaParse(parser):

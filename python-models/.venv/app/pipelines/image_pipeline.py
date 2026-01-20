@@ -27,12 +27,13 @@ class ImagePipeline:
         # (OCR, metadata, heurística simples, etc)
 
         # 2. Decidir
-        if self.analise(file_path):
+        if analise:
             return Result(
                 resultado="Detectado",
                 origem="image_pipeline",
                 tipo_dado="documento_pessoal",
                 confianca=0.85,
+                status ="ok",
                 evidencias=["imagem_documento"]
             )
 
@@ -48,13 +49,13 @@ class ImagePipeline:
         texto = pytesseract.image_to_string(imagem, lang="por")
         return texto.strip()
     
-    def normalizar_texto(texto: str) -> str:
+    def normalizar_texto(self, texto: str) -> str:
         texto = texto.lower()
         texto = re.sub(r"\s+", " ", texto)
         texto = re.sub(r"[^a-z0-9áàâãéèêíïóôõöúç ]", "", texto)
 
         return texto.strip()
-    def analisar_texto(self, text):
+    def analisar_texto(self, texto):
         for palavra in PALAVRAS_DOCUMENTO:
             if palavra in texto:
                 return True
