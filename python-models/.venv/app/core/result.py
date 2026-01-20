@@ -26,3 +26,14 @@ class Result:
             "confianca": self.confianca,
             "evidencias": self.evidencias,
         }
+        
+    @classmethod
+    def from_decisao(cls, decisao: dict, origem: str):
+        return cls(
+            status="ok",
+            resultado="Detectado" if decisao["detectado"] else "Limpo",
+            origem=origem,
+            tipo_dado=decisao.get("tipo_dado"),
+            confianca=decisao["confianca"],
+            evidencias=decisao["evidencias"]
+        )    

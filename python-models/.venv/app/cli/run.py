@@ -2,9 +2,9 @@ import argparse
 import json
 import sys
 
-from app.pipelines.image_pipeline import ImagePipeline
-from app.pipelines.audio_pipeline import AudioPipeline
-from app.pipelines.video_pipeline import VideoPipeline
+from app.inputs.image_handler import ImageHandler
+# from app.inputs.audio_handler import  AudioHandler
+# from app.inputs.video_handler import  VideoHandler
 from app.core.result import Result
 
 
@@ -17,9 +17,9 @@ def main():
     parser = argparse.ArgumentParser(description="Processador de arquivos")
     args = montaParse(parser)
 
-    pipeline = resolvePipeline(args.type)
+    handler = resolveHandler(args.type)
 
-    if pipeline is None:
+    if handler is None:
         print(json.dumps({
             "status": "error",
             "message": "Pipeline não implementado",
@@ -27,9 +27,9 @@ def main():
         }))
         sys.exit(1)
 
-    result = pipeline.processar(file_path=args.file)
-    print(json.dumps(result.to_dict()))
+    result = handler.handle(file_path=args.file)
 
+    print(json.dumps(result.to_dict()))
 
 
 def montaParse(parser):
@@ -43,15 +43,15 @@ def montaChoices():
     return IMAGE_TYPES + AUDIO_TYPES + VIDEO_TYPES + ["txt"]
 
 
-def resolvePipeline(tipo):
+def resolveHandler(tipo):
     if tipo in IMAGE_TYPES:
-        return ImagePipeline()
+        return ImageHandler()
 
     if tipo in AUDIO_TYPES:
-        return AudioPipeline()
+        return Audiohandler()
 
     if tipo in VIDEO_TYPES:
-        return VideoPipeline()
+        return Videohandler()
     
     if tipo in ["txt"]:
         return ImagePipeline()

@@ -1,47 +1,53 @@
-PALAVRAS_DOCUMENTO = [
-    "cpf",
-    "rg",
-    "registro geral",
-    "data de nascimento",
-    "nome",
-    "filiação",
-    "carteira de identidade"
-]
-
 import pytesseract
 from PIL import Image
 import re
-
-from app.core.result import Result
 import pytesseract
 
+from app.core.analise_builder import AnaliseBuilder
+from app.core.decision_engine import DecisionEngine
+from app.core.result import Result
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+PALAVRAS_CHAVE_DOCUMENTO = [
+    "cpf",
+    "rg",
+    "carteira de identidade",
+    "data de nascimento",
+    "filiação",
+    "nome",
+    "assinatura",
+]
+
+REGEX_PADROES = {
+    "cpf": r"\b\d{3}\.\d{3}\.\d{3}-\d{2}\b|\b\d{11}\b",
+    "data_nascimento": r"\b\d{2}/\d{2}/\d{4}\b",
+}
+
 
 class ImagePipeline:
     
+    def __init__(self):
+        self.decision_engine = DecisionEngine()
+
+
     def processar(self, file_path):
-        # 1. Extrair informação da imagem
         texto = self.extrair_texto(file_path)
-        texto_normalizado = self.normalizar_texto(texto)
-        analise = self.analisar_texto(texto_normalizado)
-        # (OCR, metadata, heurística simples, etc)
+        texto = self.normalizar_texto(texto)
 
-        # 2. Decidir
-        if analise:
-            return Result(
-                resultado="Detectado",
-                origem="image_pipeline",
-                tipo_dado="documento_pessoal",
-                confianca=0.85,
-                status ="ok",
-                evidencias=["imagem_documento"]
-            )
+        decisao = self.analisar_texto(texto)
 
-        return Result(
-            resultado="Limpo",
-            origem="image_pipeline",
-            confianca=0.90
+        return Result.from_decisao(
+            decisao,
+            origem="image_pipeline"
         )
+
+    def analisar_texto(self, texto: str) -> dict:
+        evidencias = []
+        evidencias.extend(self.verificarPalavraChave(texto)["evidencias"])
+        evidencias.extend(self.verificarRegex(texto)["evidencias"])
+        builder = AnaliseBuilder()
+        analise = builder.build(evidencias)
+        return self.decision_engine.decidir(analise)
         
 
     def extrair_texto(self, file_path: str) -> str:
@@ -55,10 +61,35 @@ class ImagePipeline:
         texto = re.sub(r"[^a-z0-9áàâãéèêíïóôõöúç ]", "", texto)
 
         return texto.strip()
-    def analisar_texto(self, texto):
-        for palavra in PALAVRAS_DOCUMENTO:
+    def verificarPalavraChave(self, texto: str) -> dict:
+        evidencias = []
+
+        for palavra in PALAVRAS_CHAVE_DOCUMENTO:
             if palavra in texto:
-                return True
-        
-    def decidir(self, analise):
-        pass
+                evidencias.append({
+                    "tipo": "palavra",
+                    "valor": palavra,
+                    "score": 0.15
+                })
+
+        return {"evidencias": evidencias}
+
+    def verificarRegex(self, texto: str) -> dict:
+        evidencias = []
+        tipo_dado = None
+
+        for tipo, pattern in REGEX_PADROES.items():
+            if re.search(pattern, texto):
+                evidencias.append({
+                    "tipo": "regex",
+                    "valor": tipo,
+                    "score": 0.5
+                })
+                tipo_dado = tipo
+
+        return {
+            "evidencias": evidencias,
+            "tipo_dado": tipo_dado
+        }
+                    
+                
