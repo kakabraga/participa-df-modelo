@@ -3,6 +3,7 @@
 namespace App\Services;
 use App\Integrations\Python\PythonRunner;
 use App\Services\PedidoService;
+use App\DTO\DecisaoPedidoDTO;
 class AnaliseMidiaService
 {
     private $pedidoService;
@@ -16,17 +17,27 @@ class AnaliseMidiaService
         $args = [
             '--file=' . $arquivo,
             '--type=' . $input['tipo_arquivo'],
-            '--pedido-id=' . $id_pedido,
+            '--pedido_id=' . $id_pedido,
         ];
 
         $resultado = $this->pythonRunner->run($args);
         $resultado['pedido_id'] = $id_pedido;
         // dd($resultado);
-        return $resultado;
+        $decisaoDTO = DecisaoPedidoDTO::fromPythonResult($resultado);
+        return $decisaoDTO;
     }
 
-    public function montaArgumentos()
+    public function analisarTexyo(array $input, $id_pedido)
     {
+        $args = [
+            '--text=' . $input['texto'],
+            '--pedido_id=' . $id_pedido,
+        ];
 
+        $resultado = $this->pythonRunner->run($args);
+        $resultado['pedido_id'] = $id_pedido;
+        // dd($resultado);
+        $decisaoDTO = DecisaoPedidoDTO::fromPythonResult($resultado);
+        return $decisaoDTO;
     }
 }
