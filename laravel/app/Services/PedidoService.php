@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Evidencia;
 use App\Models\Pedido;
 use App\Support\RegexPatterns;
 use App\Services\ContextDetectorService;
@@ -22,20 +23,21 @@ class PedidoService
         $this->analiseMidiaService = $analiseMidiaService;
     }
 
-    public function analisarTexto(array $input, $arquivo): Pedido
+    public function analisarTexto(array $input, $arquivo): array
     {
+        $pedido = $this->criarPedido($input);
         $detecoes_regex = $this->detectarRegex($input['texto']);
         $detecoes_contexto = [];
-        
+
         if (empty($detecoes_regex)) {
             $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
         }
 
         $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto);
         if ($decisao->resultado == 'Limpo' && $input['isArquivo']) {
-            $decisao = $this->analiseMidiaService->analisarArquivo($input, $arquivo);
+            $decisao = $this->analiseMidiaService->analisarArquivo($input, $arquivo, $pedido->id);
         }
-        return Pedido::criar($input, $decisao);
+        return $this->resolveCriacao($decisao);
     }
     private function detectarRegex($texto): array
     {
@@ -63,5 +65,49 @@ class PedidoService
         }
 
         return $detecoes;
+    }
+
+    public function criarPedido($input): Pedido
+    {
+        return Pedido::create([
+            'arquivo' => $input['isArquivo'],
+            'hash_texto' => hash('sha256', $input['texto']),
+            'resultado' => "Aguardando Análise",
+            'tipo_arquivo' => $input['tipo_arquivo'],
+            'status' => 'Pendente',
+            'origem' => 'Pendente'
+        ]);
+    }
+
+    public function registrarEvidencias($evidencias, $pedido_id)
+    {
+        $evidenciasCriadas = [];
+        foreach ($evidencias as $evidencia) {
+            $evidenciasCriadas[] = Evidencia::create([
+                'pedido_id' => $pedido_id,
+                'tipo' => $evidencia['tipo'],
+                'score' => $evidencia['score'],
+            ]);
+        }
+        return $evidenciasCriadas;
+    }
+    public function atualizaPedido($decisao)
+    {
+        $pedido = Pedido::findOrFail($decisao['pedido_id']);
+        $pedido->update([
+            'resultado' => $decisao['resultado'],
+            'origem' => $decisao['origem'],
+            'confianca' => $decisao['confianca'],
+        ]);
+
+        return $pedido;
+    }
+
+    public function resolveCriacao($decisao)
+    {
+        $retorno = [];
+        $retorno[] = $this->atualizaPedido($decisao);
+        $retorno[] = $this->registrarEvidencias($decisao['evidencias'], $decisao['pedido_id']);
+        return ($retorno);
     }
 }

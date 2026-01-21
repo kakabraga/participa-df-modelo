@@ -15,11 +15,27 @@
         </h1>
 
         @if(session('resultado'))
-            <div class="bg-green-100 text-green-700 p-3 rounded">
-                Resultado: {{ session('resultado') }}
-                <br>
+            @php $res = session('resultado'); @endphp
+
+            <div class="bg-green-100 text-green-700 p-4 rounded">
+                <p><strong>Resultado:</strong> {{ $res[0]['resultado'] }}</p>
+                <p><strong>Confiança:</strong> {{ number_format($res[0]['confianca'] * 100, 2) }}%</p>
+
+                @if(!empty($res['evidencias']))
+                    <hr class="my-2">
+                    <ul class="list-disc pl-5">
+                        @foreach($res['evidencias'] as $e)
+                            <li>
+                                {{ ucfirst($e['tipo']) }}:
+                                <strong>{{ $e['valor'] }}</strong>
+                                (score {{ $e['score'] }})
+                            </li>
+                        @endforeach
+                    </ul>
+                @endif
             </div>
         @endif
+
 
         {{-- Erros de validação --}}
         @if ($errors->any())

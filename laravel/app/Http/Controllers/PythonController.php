@@ -29,8 +29,6 @@ class PythonController extends Controller
             "--pedido-id",
             123
         ]);
-
-
         return response()->json($saida);
 
     }
