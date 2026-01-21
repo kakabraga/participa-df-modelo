@@ -6,14 +6,6 @@ class NLPService:
         self.nlp = spacy.load("pt_core_news_sm")
 
     def analisar(self, texto: str) -> list[dict]:
-        """
-        Recebe um texto e retorna entidades PII ou padrões que queremos detectar
-        Exemplo de retorno:
-        [
-            {"tipo": "entidade", "valor": "João da Silva", "score": 0.8},
-            {"tipo": "entidade", "valor": "01/01/1990", "score": 0.5}
-        ]
-        """
         doc = self.nlp(texto)
         evidencias = []
 

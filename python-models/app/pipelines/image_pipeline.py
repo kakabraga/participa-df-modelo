@@ -40,7 +40,7 @@ class ImagePipeline:
 
         return Result.from_decisao(
             decisao,
-            origem="image_pipeline"
+            origem="modelo_nlp"
         )
 
     def analisar_texto(self, texto: str) -> dict:
