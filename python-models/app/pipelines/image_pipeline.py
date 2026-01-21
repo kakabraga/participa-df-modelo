@@ -32,8 +32,17 @@ class ImagePipeline:
         self.nlp_service = NLPService()
 
 
-    def processar(self, file_path):
+    def processarArquivo(self, file_path):
         texto = self.extrair_texto(file_path)
+        texto = self.normalizar_texto(texto)
+
+        decisao = self.analisar_texto(texto)
+
+        return Result.from_decisao(
+            decisao,
+            origem="modelo_nlp"
+        )
+    def processarTexto(self, texto):
         texto = self.normalizar_texto(texto)
 
         decisao = self.analisar_texto(texto)

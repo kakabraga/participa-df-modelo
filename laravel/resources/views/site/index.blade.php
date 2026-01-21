@@ -18,8 +18,8 @@
             @php $res = session('resultado'); @endphp
 
             <div class="bg-green-100 text-green-700 p-4 rounded">
-                <p><strong>Resultado:</strong> {{ $res[0]['resultado'] }}</p>
-                <p><strong>Confiança:</strong> {{ number_format($res[0]['confianca'] * 100, 2) }}%</p>
+                <p><strong>Resultado:</strong> {{ $res['resultado'] }}</p>
+                <p><strong>Confiança:</strong> {{ number_format($res['confianca'] * 100, 2) }}%</p>
 
                 @if(!empty($res['evidencias']))
                     <hr class="my-2">

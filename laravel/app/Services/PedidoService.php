@@ -8,6 +8,7 @@ use App\Support\RegexPatterns;
 use App\Services\ContextDetectorService;
 use App\Services\ClassificadorService;
 use App\Services\AnaliseMidiaService;
+use App\DTO\PersistenciaDecisaoDTO;
 class PedidoService
 {
     private $contextDetectorService;
@@ -23,7 +24,7 @@ class PedidoService
         $this->analiseMidiaService = $analiseMidiaService;
     }
 
-    public function analisarTexto(array $input, $arquivo): array
+    public function analisarTextoArquivo(array $input, $arquivo): PersistenciaDecisaoDTO
     {
         $pedido = $this->criarPedido($input);
         $detecoes_regex = $this->detectarRegex($input['texto']);
@@ -33,9 +34,25 @@ class PedidoService
             $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
         }
 
-        $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto);
-        if ($decisao->resultado == 'Limpo' && $input['isArquivo']) {
+        $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto, $pedido->id);
+        if ($decisao->resultado == 'Limpo') {
             $decisao = $this->analiseMidiaService->analisarArquivo($input, $arquivo, $pedido->id);
+        }
+        return $this->resolveCriacao($decisao);
+    }
+    public function analisarTexto(string $input): PersistenciaDecisaoDTO
+    {
+        $pedido = $this->criarPedido($input);
+        $detecoes_regex = $this->detectarRegex($input['texto']);
+        $detecoes_contexto = [];
+
+        if (empty($detecoes_regex)) {
+            $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
+        }
+
+        $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto, $pedido->id);
+        if ($decisao->resultado == 'Limpo') {
+            $decisao = $this->analiseMidiaService->analisarTexto($input, $pedido->id);
         }
         return $this->resolveCriacao($decisao);
     }
@@ -85,29 +102,33 @@ class PedidoService
         foreach ($evidencias as $evidencia) {
             $evidenciasCriadas[] = Evidencia::create([
                 'pedido_id' => $pedido_id,
-                'tipo' => $evidencia['tipo'],
-                'score' => $evidencia['score'],
+                'tipo' => $evidencia->tipo,
+                'score' => $evidencia->score,
             ]);
         }
         return $evidenciasCriadas;
     }
     public function atualizaPedido($decisao)
     {
-        $pedido = Pedido::findOrFail($decisao['pedido_id']);
+        $pedido = Pedido::findOrFail($decisao->pedido_id);
         $pedido->update([
-            'resultado' => $decisao['resultado'],
-            'origem' => $decisao['origem'],
-            'confianca' => $decisao['confianca'],
+            'resultado' => $decisao->resultado,
+            'origem' => $decisao->origem,
+            'confianca' => $decisao->confianca,
         ]);
 
         return $pedido;
     }
 
-    public function resolveCriacao($decisao)
+    public function resolveCriacao($decisao): PersistenciaDecisaoDTO
     {
-        $retorno = [];
-        $retorno[] = $this->atualizaPedido($decisao);
-        $retorno[] = $this->registrarEvidencias($decisao['evidencias'], $decisao['pedido_id']);
-        return ($retorno);
+        return new PersistenciaDecisaoDTO(
+            pedido: $this->atualizaPedido($decisao),
+            evidencias: $this->registrarEvidencias(
+                $decisao->evidencias,
+                $decisao->pedido_id
+            )
+        );
     }
+
 }

@@ -26,15 +26,20 @@ class PedidoController extends Controller
     public function storeTexto(Request $request)
     {
         $input = $this->prepararInput($request);
-        $pedido = $this->pedidoService->analisarTexto($input, $request->arquivo);        
-        $message = $pedido[0]['resultado'] != 'Limpo' ? 'Texto contém informações pessoais!' : 'Texto não contém informações pessoais!';
-        return redirect()->route('home')->with('resultado', $pedido);
+        $pedido = $input['isArquivo']  
+        ?  $this->pedidoService->analisarTextoArquivo($input, $request->arquivo)
+        : $this->pedidoService->analisarTexto($input['texto']);
+        
+        //$message = $pedido[0]['resultado'] != 'Limpo' ? 'Texto contém informações pessoais!' : 'Texto não contém informações pessoais!';
+        return redirect()->route('home')->with('resultado', $this->montaResultadoView($pedido));
     }
 
     public function prepararInput(Request $request)
     {
+        $extension = $request->arquivo->extension();
+
         if ($request->hasFile('arquivo')) {
-            return $this->processaInputArquivo($request);
+            return $this->processaInputArquivo($request, $extension);
         }
         if ($request->filled('texto')) {
             return $this->getInputTexto($request);
@@ -44,10 +49,10 @@ class PedidoController extends Controller
             'isArquivo' => false
         ];
     }
-    public function processaInputArquivo(Request $request)
+    public function processaInputArquivo(Request $request, $extension)
     {
-        $extension = $request->arquivo->extension();
-        if($extension == 'txt') {
+        
+        if ($extension == 'txt') {
             return $this->getInputArquivoTexto($request, $extension);
         }
 
@@ -58,12 +63,12 @@ class PedidoController extends Controller
     public function getInputArquivoTexto(Request $request, string $extension)
     {
         return [
-            'texto' => $this->importacaoService->processaArquivoTexto($request->file('arquivo')),
+            'texto' => $this->importacaoService->processaArquivoTexto(arquivo: $request->file('arquivo')),
             'isArquivo' => true,
             'tipo_arquivo' => $extension
         ];
     }
-    public function getInputArquivoImagem(Request $request,  string $extension)
+    public function getInputArquivoImagem(Request $request, string $extension)
     {
         return [
             'texto' => $this->importacaoService->processaArquivoImagem($request->file('arquivo')),
@@ -76,6 +81,16 @@ class PedidoController extends Controller
         return [
             'texto' => $request->input('texto'),
             'isArquivo' => false
+        ];
+    }
+
+    private function montaResultadoView($resultado)
+    {
+        return [
+            'resultado' => $resultado->pedido->resultado,
+            'origem' => $resultado->pedido->origem,
+            'confianca' => $resultado->pedido->confianca,
+            'evidencias' => $resultado->evidencias,
         ];
     }
 }
