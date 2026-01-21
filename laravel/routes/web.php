@@ -16,7 +16,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [PedidoController::class, 'index'])->name('home');
-Route::post('/anallisar', [PedidoController::class, 'storeTexto'])->name('pedido.analisar');
+Route::post('/analisar', [PedidoController::class, 'storeTexto'])->name('pedido.analisar');
 Route::post('/python', [PythonController::class, 'store'])->name('app.python');
 // Route::get('/teste-ocr', function () {
 //     $ocr = app(\App\Services\OcrService::class);

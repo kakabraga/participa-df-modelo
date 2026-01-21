@@ -30,12 +30,9 @@ class PythonRunner
 
         $command = $this->criaComandoBase($args);
         $process = $this->iniciaProcesso($command);
-        // if (!$process->isSuccessful()) {
-        //     $this->capturaErrosPython($process);
-        // }
-
-        dd($process->getOutput());
-
+        if (!$process->isSuccessful()) {
+            $this->capturaErrosPython($process);
+        }
         return $this->parseOutput($process->getOutput());
 
     }
