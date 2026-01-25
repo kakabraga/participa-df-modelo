@@ -1,5 +1,4 @@
 import pytesseract
-from PIL import Image
 import re
 
 from app.core.analise_builder import AnaliseBuilder
@@ -24,24 +23,13 @@ REGEX_PADROES = {
 }
 
 
-class ImagePipeline:
+class TextoPipeline:
     
     def __init__(self):
         self.decision_engine = DecisionEngine()
         self.nlp_service = NLPService()
 
-
-    def processarArquivo(self, file_path):
-        texto = self.extrair_texto(file_path)
-        texto = self.normalizar_texto(texto)
-
-        decisao = self.analisar_texto(texto)
-
-        return Result.from_decisao(
-            decisao,
-            origem="modelo_nlp"
-        )
-    def processarTexto(self, texto):
+    def processar(self, texto):
         texto = self.normalizar_texto(texto)
 
         decisao = self.analisar_texto(texto)
@@ -51,6 +39,13 @@ class ImagePipeline:
             origem="modelo_nlp"
         )
 
+    def normalizar_texto(self, texto: str) -> str:
+        texto = texto.lower()
+        texto = re.sub(r"\s+", " ", texto)
+        texto = re.sub(r"[^a-z0-9áàâãéèêíïóôõöúç ]", "", texto)
+        return texto
+
+        
     def analisar_texto(self, texto: str) -> dict:
         evidencias = []
         evidencias.extend(self.verificarPalavraChave(texto)["evidencias"])
@@ -59,19 +54,7 @@ class ImagePipeline:
         builder = AnaliseBuilder()
         analise = builder.build(evidencias)
         return self.decision_engine.decidir(analise)
-        
-
-    def extrair_texto(self, file_path: str) -> str:
-        imagem = Image.open(file_path)
-        texto = pytesseract.image_to_string(imagem, lang="por")
-        return texto.strip()
     
-    def normalizar_texto(self, texto: str) -> str:
-        texto = texto.lower()
-        texto = re.sub(r"\s+", " ", texto)
-        texto = re.sub(r"[^a-z0-9áàâãéèêíïóôõöúç ]", "", texto)
-
-        return texto.strip()
     def verificarPalavraChave(self, texto: str) -> dict:
         evidencias = []
 
@@ -84,7 +67,6 @@ class ImagePipeline:
                 })
 
         return {"evidencias": evidencias}
-
     def verificarRegex(self, texto: str) -> dict:
         evidencias = []
         tipo_dado = None
@@ -102,5 +84,3 @@ class ImagePipeline:
             "evidencias": evidencias,
             "tipo_dado": tipo_dado
         }
-                    
-                

@@ -45,7 +45,6 @@ class PedidoService
         $pedido = $this->criarPedido($input);
         $detecoes_regex = $this->detectarRegex($input['texto']);
         $detecoes_contexto = [];
-
         if (empty($detecoes_regex)) {
             $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
         }
