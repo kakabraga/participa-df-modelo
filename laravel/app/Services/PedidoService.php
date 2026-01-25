@@ -40,7 +40,7 @@ class PedidoService
         }
         return $this->resolveCriacao($decisao);
     }
-    public function analisarTexto(string $input): PersistenciaDecisaoDTO
+    public function analisarTexto(array $input): PersistenciaDecisaoDTO
     {
         $pedido = $this->criarPedido($input);
         $detecoes_regex = $this->detectarRegex($input['texto']);
@@ -90,7 +90,7 @@ class PedidoService
             'arquivo' => $input['isArquivo'],
             'hash_texto' => hash('sha256', $input['texto']),
             'resultado' => "Aguardando Análise",
-            'tipo_arquivo' => $input['tipo_arquivo'],
+            'tipo_arquivo' => $input['tipo_arquivo'] ?? "texto",
             'status' => 'Pendente',
             'origem' => 'Pendente'
         ]);

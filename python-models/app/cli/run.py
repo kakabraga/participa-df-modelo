@@ -3,21 +3,21 @@ import json
 import sys
 
 from app.inputs.image_handler import ImageHandler
-# from app.inputs.audio_handler import  AudioHandler
-# from app.inputs.video_handler import  VideoHandler
 from app.core.result import Result
-
-
-IMAGE_TYPES = ["jpg", "jpeg"]
-AUDIO_TYPES = ["mp3"]
-VIDEO_TYPES = ["mp4"]
 
 
 def main():
     try:
-        args, tipo_entrada = parse_args()
-        handler = resolve_handler_por_args(args, tipo_entrada)
-        result = executar_handler(handler, args, tipo_entrada)
+        args = parse_args()
+        handler = resolve_handler(args.type)
+
+        if args.file:
+            result = handler.handle_file(args.file)
+        elif args.text:
+            result = handler.handle_text(args.text)
+        else:
+            raise ValueError("Informe --file ou --text")
+
         imprimir_resultado(result)
 
     except Exception as e:
@@ -27,85 +27,41 @@ def main():
         }))
         sys.exit(1)
 
-def detectar_tipo_entrada(argv: list[str]) -> str:
-    if any(arg.startswith("--file") for arg in argv):
-        return "file"
-
-    if any(arg.startswith("--text") for arg in argv):
-        return "text"
-
-    return "unknown"
-
 
 def parse_args():
-    tipo = detectar_tipo_entrada(sys.argv)
+    parser = argparse.ArgumentParser(description="Processador multimodal")
 
-    if tipo == "file":
-        return monta_parse_arquivo(), "file"
+    parser.add_argument("--type", required=True, choices=["image"])
+    parser.add_argument("--file")
+    parser.add_argument("--text")
+    parser.add_argument("--pedido_id")
 
-    if tipo == "text":
-        return monta_parse_texto(), "text"
+    args = parser.parse_args()
 
-    raise ValueError("Informe --file ou --text")
+    if not args.file and not args.text:
+        raise ValueError("Informe --file ou --text")
 
-def monta_parse_arquivo():
-    parser = argparse.ArgumentParser(description="Processador de arquivos")
-    parser.add_argument("--type", required=True)
-    parser.add_argument("--file", required=True)
-    parser.add_argument("--pedido_id", required=True)
-
-    return parser.parse_args()
-
-def monta_parse_texto():
-    parser = argparse.ArgumentParser(description="Processador de texto")
-
-    parser.add_argument("--text", required=True)
-
-    return parser.parse_args()
-
-def resolve_handler_por_args(args, tipo_entrada: str):
-    if tipo_entrada == "file":
-        return resolveHandler(args.type)
-
-    if tipo_entrada == "text":
-        return resolveHandler("text")
-
-    raise RuntimeError("Handler não implementado")
+    return args
 
 
-def executar_handler(handler, args, tipo_entrada: str):
-    if tipo_entrada == "file":
-        return handler.handle_file(args.file)
+def resolve_handler(tipo: str):
+    handlers = {
+        "image": ImageHandler,
+        # "audio": AudioHandler,
+        # "video": VideoHandler,
+        # "text": TextHandler,
+    }
 
-    if tipo_entrada == "text":
-        return handler.handle_text(args.text)
+    if tipo not in handlers:
+        raise ValueError(f"Tipo não suportado: {tipo}")
 
-    raise RuntimeError("Tipo de execução inválido")
+    return handlers[tipo]()
 
-
-
-def montaChoices():
-    return IMAGE_TYPES + AUDIO_TYPES + VIDEO_TYPES + ["txt"]
 
 def imprimir_resultado(result: Result):
     print(json.dumps(result.to_dict()))
 
 
-def resolveHandler(tipo):
-    if tipo in IMAGE_TYPES:
-        return ImageHandler()
-
-    if tipo in AUDIO_TYPES:
-        return Audiohandler()
-
-    if tipo in VIDEO_TYPES:
-        return Videohandler()
-    
-    if tipo in ["txt"]:
-        return ImagePipeline()
-
-    return None
-
-
 if __name__ == "__main__":
     main()
+ 
