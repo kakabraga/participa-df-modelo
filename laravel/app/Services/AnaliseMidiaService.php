@@ -16,7 +16,7 @@ class AnaliseMidiaService
     {
         $args = [
             '--file=' . $arquivo,
-            '--type=' . $input['tipo_arquivo'],
+            '--type=' . "image",
             '--pedido_id=' . $id_pedido,
         ];
 
@@ -27,7 +27,7 @@ class AnaliseMidiaService
         return $decisaoDTO;
     }
 
-    public function analisarTexyo(array $input, $id_pedido)
+    public function analisarTexto(array $input, $id_pedido)
     {
         $args = [
             '--text=' . $input['texto'],
@@ -35,8 +35,6 @@ class AnaliseMidiaService
         ];
 
         $resultado = $this->pythonRunner->run($args);
-        $resultado['pedido_id'] = $id_pedido;
-        // dd($resultado);
         $decisaoDTO = DecisaoPedidoDTO::fromPythonResult($resultado);
         return $decisaoDTO;
     }

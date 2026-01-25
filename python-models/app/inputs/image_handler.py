@@ -2,6 +2,10 @@ from app.pipelines.image_pipeline import ImagePipeline
 
 class ImageHandler:
 
-    def handle(self, file_path: str):
+    def handle_file(self, file_path: str):
         pipeline = ImagePipeline()
-        return pipeline.processar(file_path)
+        return pipeline.processarArquivo(file_path)
+
+    def handle_text(self, text: str):
+        raise RuntimeError("ImageHandler não suporta texto direto")
+

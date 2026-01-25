@@ -28,7 +28,7 @@ class PedidoController extends Controller
         $input = $this->prepararInput($request);
         $pedido = $input['isArquivo']  
         ?  $this->pedidoService->analisarTextoArquivo($input, $request->arquivo)
-        : $this->pedidoService->analisarTexto($input['texto']);
+        : $this->pedidoService->analisarTexto($input);
         
         //$message = $pedido[0]['resultado'] != 'Limpo' ? 'Texto contém informações pessoais!' : 'Texto não contém informações pessoais!';
         return redirect()->route('home')->with('resultado', $this->montaResultadoView($pedido));
@@ -36,9 +36,8 @@ class PedidoController extends Controller
 
     public function prepararInput(Request $request)
     {
-        $extension = $request->arquivo->extension();
-
         if ($request->hasFile('arquivo')) {
+            $extension = $request->arquivo->extension();
             return $this->processaInputArquivo($request, $extension);
         }
         if ($request->filled('texto')) {
