@@ -3,6 +3,7 @@ import json
 import sys
 
 from app.inputs.image_handler import ImageHandler
+from app.inputs.texto_handler import TextoHandler
 from app.core.result import Result
 
 
@@ -12,9 +13,9 @@ def main():
         handler = resolve_handler(args.type)
 
         if args.file:
-            result = handler.handle_file(args.file)
+            result = handler.handle(args.file)
         elif args.text:
-            result = handler.handle_text(args.text)
+            result = handler.handle(args.text)
         else:
             raise ValueError("Informe --file ou --text")
 
@@ -31,15 +32,20 @@ def main():
 def parse_args():
     parser = argparse.ArgumentParser(description="Processador multimodal")
 
-    parser.add_argument("--type", required=True, choices=["image"])
+    parser.add_argument("--type", choices=["image", "texto"])
     parser.add_argument("--file")
     parser.add_argument("--text")
     parser.add_argument("--pedido_id")
 
     args = parser.parse_args()
 
-    if not args.file and not args.text:
-        raise ValueError("Informe --file ou --text")
+    if not args.type:
+            if args.text:
+                args.type = "text"
+            elif args.file:
+                args.type = "image"
+            else:
+                raise ValueError("Informe --text ou --file")
 
     return args
 
@@ -49,7 +55,7 @@ def resolve_handler(tipo: str):
         "image": ImageHandler,
         # "audio": AudioHandler,
         # "video": VideoHandler,
-        # "text": TextHandler,
+        "text": TextoHandler,
     }
 
     if tipo not in handlers:
