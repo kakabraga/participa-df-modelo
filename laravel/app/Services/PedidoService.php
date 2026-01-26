@@ -38,6 +38,7 @@ class PedidoService
         if ($decisao->resultado == 'Limpo') {
             $decisao = $this->analiseMidiaService->analisarArquivo($input, $arquivo, $pedido->id);
         }
+
         return $this->resolveCriacao($decisao);
     }
     public function analisarTexto(array $input): PersistenciaDecisaoDTO
@@ -101,11 +102,11 @@ class PedidoService
         foreach ($evidencias as $evidencia) {
             $evidenciasCriadas[] = Evidencia::create([
                 'pedido_id' => $pedido_id,
-                'tipo' => $evidencia->tipo,
-                'score' => $evidencia->score,
+                'tipo' => $evidencia->tipo ?? "nenhum",
+                'score' => $evidencia->score ?? 0.0,
             ]);
         }
-        return ($evidenciasCriadas);
+        return $evidenciasCriadas;
     }
     public function atualizaPedido($decisao)
     {

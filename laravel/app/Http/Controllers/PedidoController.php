@@ -20,17 +20,15 @@ class PedidoController extends Controller
     }
     public function index()
     {
-        return view('site.index');
+        return view('site.index', ['accept' => $this->montaAccept()]);
     }
 
     public function storeTexto(Request $request)
     {
         $input = $this->prepararInput($request);
-        $pedido = $input['isArquivo']  
-        ?  $this->pedidoService->analisarTextoArquivo($input, $request->arquivo)
-        : $this->pedidoService->analisarTexto($input);
-        
-        //$message = $pedido[0]['resultado'] != 'Limpo' ? 'Texto contém informações pessoais!' : 'Texto não contém informações pessoais!';
+        $pedido = $input['isArquivo']
+            ? $this->pedidoService->analisarTextoArquivo($input, $request->arquivo)
+            : $this->pedidoService->analisarTexto($input);
         return redirect()->route('home')->with('resultado', $this->montaResultadoView($pedido));
     }
 
@@ -38,7 +36,8 @@ class PedidoController extends Controller
     {
         if ($request->hasFile('arquivo')) {
             $extension = $request->arquivo->extension();
-            return $this->processaInputArquivo($request, $extension);
+            $mime      = $request->file('arquivo')->extension();
+            return $this->processaInputArquivo($request, $extension, $mime);
         }
         if ($request->filled('texto')) {
             return $this->getInputTexto($request);
@@ -48,16 +47,20 @@ class PedidoController extends Controller
             'isArquivo' => false
         ];
     }
-    public function processaInputArquivo(Request $request, $extension)
+    public function processaInputArquivo(Request $request, $extension, $mime)
     {
-        
+
         if ($extension == 'txt') {
             return $this->getInputArquivoTexto($request, $extension);
         }
 
+        if (in_array($extension, $this->montaArrayImageAccept(), true)) {
+            return $this->getInputArquivoImagem($request, $extension);
+        }
         if (in_array($extension, ['jpg', 'jpeg'])) {
             return $this->getInputArquivoImagem($request, $extension);
         }
+
     }
     public function getInputArquivoTexto(Request $request, string $extension)
     {
@@ -91,5 +94,36 @@ class PedidoController extends Controller
             'confianca' => $resultado->pedido->confianca,
             'evidencias' => $resultado->evidencias,
         ];
+    }
+    private function montaArrayVideoAccept()
+    {
+        return [
+            'video/mp4',
+            'video/webm',
+            'video/ogg',
+            'video/quicktime',
+        ];
+    }
+    private function montaArrayAudioAccept()
+    {
+        return [
+            'audio/mpeg',
+            'audio/wav',
+            'audio/ogg',
+            'audio/webm',
+            'audio/aac',
+            'audio/mp4'
+        ];
+    }
+    private function montaArrayImageAccept()
+    {
+        return [
+            'image/jpeg',
+            'image/jpg',
+        ];
+    }
+    private function montaAccept()
+    {
+        return array_merge($this->montaArrayImageAccept(), $this->montaArrayAudioAccept(), $this->montaArrayVideoAccept());
     }
 }
