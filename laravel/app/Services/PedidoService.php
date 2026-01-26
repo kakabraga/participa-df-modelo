@@ -105,7 +105,7 @@ class PedidoService
                 'score' => $evidencia->score,
             ]);
         }
-        return $evidenciasCriadas;
+        return ($evidenciasCriadas);
     }
     public function atualizaPedido($decisao)
     {
@@ -125,7 +125,7 @@ class PedidoService
             pedido: $this->atualizaPedido($decisao),
             evidencias: $this->registrarEvidencias(
                 $decisao->evidencias,
-                $decisao->pedido_id
+                $decisao->pedido_id,
             )
         );
     }

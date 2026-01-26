@@ -63,7 +63,7 @@ class PedidoController extends Controller
     {
         return [
             'texto' => $this->importacaoService->processaArquivoTexto(arquivo: $request->file('arquivo')),
-            'isArquivo' => true,
+            'isArquivo' => false,
             'tipo_arquivo' => $extension
         ];
     }

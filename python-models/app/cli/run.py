@@ -32,7 +32,7 @@ def main():
 def parse_args():
     parser = argparse.ArgumentParser(description="Processador multimodal")
 
-    parser.add_argument("--type", choices=["image", "texto"])
+    parser.add_argument("--type", choices=["image", "texto", "txt"])
     parser.add_argument("--file")
     parser.add_argument("--text")
     parser.add_argument("--pedido_id")
