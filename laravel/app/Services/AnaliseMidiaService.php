@@ -16,7 +16,7 @@ class AnaliseMidiaService
     {
         $args = [
             '--file=' . $arquivo,
-            '--type=' . $input['tipo_arquivo'],
+            '--type=' . "image",
             '--pedido_id=' . $id_pedido,
         ];
         $resultado = $this->pythonRunner->run($args);
