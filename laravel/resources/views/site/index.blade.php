@@ -48,7 +48,7 @@
             </div>
         @endif
 
-        @component('site.layouts._components.form_pedido')
+        @component('site.layouts._components.form_pedido', ['accept' => $accept]);
         @endcomponent
     </div>
 

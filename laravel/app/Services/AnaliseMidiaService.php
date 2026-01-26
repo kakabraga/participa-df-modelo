@@ -21,7 +21,6 @@ class AnaliseMidiaService
         ];
         $resultado = $this->pythonRunner->run($args);
         $resultado['pedido_id'] = $id_pedido;
-        // dd($resultado);
         $decisaoDTO = DecisaoPedidoDTO::fromPythonResult($resultado);
         return $decisaoDTO;
     }
