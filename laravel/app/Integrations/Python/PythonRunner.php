@@ -29,7 +29,9 @@ class PythonRunner
     {
 
         $command = $this->criaComandoBase($args);
+        // dd($command);
         $process = $this->iniciaProcesso($command);
+        // dd($process);
         if (!$process->isSuccessful()) {
             $this->capturaErrosPython($process);
         }
@@ -39,12 +41,26 @@ class PythonRunner
 
     protected function iniciaProcesso(array $command): Process
     {
-        $process = new Process($command, base_path('../python-models'));
+        $env = array_merge(getenv(), [
+            'VIRTUAL_ENV' => $this->pathVenv,
+            'PYTHONPATH' => base_path('../python-models'),
+            'PATH' => $this->pathVenv . '\\Scripts;' . getenv('PATH'),
+        ]);
+
+        $process = new Process(
+            $command,
+            base_path('../python-models'),
+            $env
+        );
+
         $process->setTimeout(600);
         $process->run();
 
         return $process;
     }
+
+
+
 
     protected function criaComandoBase(array $args = []): array
     {

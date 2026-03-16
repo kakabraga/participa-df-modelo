@@ -10,16 +10,17 @@ class OcrService
     public function extrairTexto(string $imagemPath): string
     {
         $process = $this->processaTessaract($imagemPath);
-        $process->run();
+        $process->mustRun();
 
-        $this->capturaErros($process);
         $texto = $process->getOutput();
-        $texto_normalizado = $this->normalizarTexto($texto);
-        $texto_corrigido = $this->corrigirErrosComuns($texto_normalizado);
-        return $this->prepararParaAnalise($texto_corrigido);
+        return $this->prepararParaAnalise(
+            $this->corrigirErrosComuns(
+                $this->normalizarTexto($texto)
+            )
+        );
     }
 
-    public function processaTessaract($imagemPath)
+    public function processaTessaract($imagemPath): Process
     {
         return new Process([
             $this->tesseractPath,
@@ -35,7 +36,7 @@ class OcrService
     }
     private function capturaErros(Process $process): void
     {
-        if (! $process->isSuccessful()) {
+        if (!$process->isSuccessful()) {
             throw new \RuntimeException(
                 'OCR falhou: ' . $process->getErrorOutput()
             );
@@ -64,9 +65,9 @@ class OcrService
             'Ãµ' => 'õ',
             'Ã§' => 'ç',
             'Ã‰' => 'É',
-            'Ã'  => 'Á',
-            '0'  => 'O', // contexto textual
-            '1'  => 'I',
+            'Ã' => 'Á',
+            '0' => 'O', // contexto textual
+            '1' => 'I',
         ];
 
         return str_replace(array_keys($map), array_values($map), $texto);

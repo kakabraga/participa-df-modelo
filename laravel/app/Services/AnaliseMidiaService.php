@@ -12,24 +12,44 @@ class AnaliseMidiaService
     ) {
     }
 
-    public function analisarArquivo(array $input, $arquivo, $id_pedido)
+    public function analisarArquivo(string $arquivo, int $id_pedido)
     {
         $args = [
-            '--file=' . $arquivo,
-            '--type=' . "image",
+            '--file=' . realpath($arquivo),
+            '--type=image',
             '--pedido_id=' . $id_pedido,
         ];
+
         $resultado = $this->pythonRunner->run($args);
+
         $resultado['pedido_id'] = $id_pedido;
-        $decisaoDTO = DecisaoPedidoDTO::fromPythonResult($resultado);
-        return $decisaoDTO;
+
+        return DecisaoPedidoDTO::fromPythonResult($resultado);
     }
 
-    public function analisarTexto(array $input, $id_pedido)
+    public function analisarTexto($entrada, $id_pedido)
     {
         $args = [
-            '--text=' . $input['texto'],
+            '--text',
+            $entrada->texto,
+            '--pedido_id',
+            (string) $id_pedido,
+        ];
+
+        $resultado = $this->pythonRunner->run($args);
+
+        $resultado['pedido_id'] = $id_pedido;
+
+        return DecisaoPedidoDTO::fromPythonResult($resultado);
+    }
+
+    public function analisarAudio($entrada, $id_pedido)
+    {
+        $args = [
+            '--file=' . $entrada->arquivo,
+            '--type=' . "audio",
             '--pedido_id=' . $id_pedido,
+
         ];
 
         $resultado = $this->pythonRunner->run($args);

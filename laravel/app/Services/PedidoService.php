@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\DTO\EntradaPedidoDTO;
 use App\Models\Evidencia;
 use App\Models\Pedido;
 use App\Support\RegexPatterns;
@@ -24,36 +25,46 @@ class PedidoService
         $this->analiseMidiaService = $analiseMidiaService;
     }
 
-    public function analisarTextoArquivo(array $input, $arquivo): PersistenciaDecisaoDTO
+    public function analisarTextoArquivo(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
     {
-        $pedido = $this->criarPedido($input);
-        $detecoes_regex = $this->detectarRegex($input['texto']);
+        $pedido = $this->criarPedido($entrada);
+        $detecoes_regex = $this->detectarRegex($entrada->texto);
         $detecoes_contexto = [];
 
         if (empty($detecoes_regex)) {
-            $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
+            $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($entrada->texto);
         }
 
         $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto, $pedido->id);
         if ($decisao->resultado == 'Limpo') {
-            $decisao = $this->analiseMidiaService->analisarArquivo($input, $arquivo, $pedido->id);
+            $decisao = $this->analiseMidiaService->analisarArquivo($entrada->arquivo, $pedido->id);
         }
 
         return $this->resolveCriacao($decisao);
     }
-    public function analisarTexto(array $input): PersistenciaDecisaoDTO
+    public function analisarTexto(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
     {
-        $pedido = $this->criarPedido($input);
-        $detecoes_regex = $this->detectarRegex($input['texto']);
+        $pedido = $this->criarPedido($entrada);
+        $detecoes_regex = $this->detectarRegex($entrada->texto);
         $detecoes_contexto = [];
+
         if (empty($detecoes_regex)) {
-            $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($input['texto']);
+            $detecoes_contexto = $this->contextDetectorService->detectarContextoPorArquivo($entrada->texto);
+        }
+        $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto, $pedido->id);
+
+        if ($decisao->resultado == 'Limpo') {
+            $decisao = $this->analiseMidiaService->analisarTexto($entrada, $pedido->id);
         }
 
-        $decisao = $this->classificadorService->decide($detecoes_regex, $detecoes_contexto, $pedido->id);
-        if ($decisao->resultado == 'Limpo') {
-            $decisao = $this->analiseMidiaService->analisarTexto($input, $pedido->id);
-        }
+        return $this->resolveCriacao($decisao);
+        
+    }
+    public function analisarAudioArquivo(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
+    {
+        $pedido = $this->criarPedido($entrada);
+        $decisao = $this->analiseMidiaService->analisarAudio($entrada, $pedido->id);
+
         return $this->resolveCriacao($decisao);
     }
     private function detectarRegex($texto): array
@@ -84,13 +95,13 @@ class PedidoService
         return $detecoes;
     }
 
-    public function criarPedido($input): Pedido
+    public function criarPedido($entrada): Pedido
     {
         return Pedido::create([
-            'arquivo' => $input['isArquivo'],
-            'hash_texto' => hash('sha256', $input['texto']),
+            'arquivo' => $entrada->isArquivo,
+            'hash_texto' => hash('sha256', $entrada->texto),
             'resultado' => "Aguardando Análise",
-            'tipo_arquivo' => $input['tipo_arquivo'] ?? "texto",
+            'tipo_arquivo' => $entrada->tipo_arquivo ?? "texto",
             'status' => 'Pendente',
             'origem' => 'Pendente'
         ]);

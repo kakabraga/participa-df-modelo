@@ -20,7 +20,8 @@ class PythonController extends Controller
         $path = $file->store('uploads_temp');
 
         $fullPath = storage_path('app/' . $path);
-
+        dd($fullPath);
+        exit();
         $saida = $python->run([
             "--file",
             $fullPath,
