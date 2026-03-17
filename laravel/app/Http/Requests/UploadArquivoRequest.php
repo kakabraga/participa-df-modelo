@@ -6,9 +6,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class UploadArquivoRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
+    private const MAX_FILE_SIZE = 51200;
     public function authorize(): bool
     {
         return true;
@@ -24,7 +22,7 @@ class UploadArquivoRequest extends FormRequest
         return [
             'arquivo' => [
                 'file',
-                'max:51200', // 50MB
+                'max:' . self::MAX_FILE_SIZE,, // 50MB
                 'mimetypes:' . implode(',', $this->tiposPermitidos())
             ],
         ];
@@ -32,25 +30,30 @@ class UploadArquivoRequest extends FormRequest
 
     private function tiposPermitidos(): array
     {
+        return array_merge($this->tiposImage(), $this->tiposTexto(), $this->tiposVideo());
+    }
+    private function tiposImage(): array
+    {
         return [
-            // imagens
             'image/jpeg',
             'image/png',
             'image/webp',
-
+        ];
+    }
+    private function tiposVideo(): array
+    {
+        return [
             // vídeos
             'video/mp4',
             'video/webm',
             'video/ogg',
             'video/quicktime',
-
-            // áudios
-            'audio/mpeg',
-            'audio/wav',
-            'audio/ogg',
-            'audio/webm',
-            'audio/aac',
-            'audio/mp4',
+        ];
+    }
+    private function tiposTexto(): array
+    {
+        return [
+            'text/plain'
         ];
     }
 }
