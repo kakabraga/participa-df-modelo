@@ -30,6 +30,7 @@ class AnaliseMidiaService
     public function analisarTexto($entrada, $id_pedido)
     {
         $args = [
+            '--type=text',
             '--text',
             $entrada->texto,
             '--pedido_id',

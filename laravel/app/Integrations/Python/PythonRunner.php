@@ -27,7 +27,8 @@ class PythonRunner
 
     public function run(array $args = []): array
     {
-
+        // dd($args);
+        
         $command = $this->criaComandoBase($args);
         // dd($command);
         $process = $this->iniciaProcesso($command);

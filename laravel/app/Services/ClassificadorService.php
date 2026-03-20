@@ -22,7 +22,7 @@ class ClassificadorService
     {
         return DecisaoPedidoDTO::detectado(
                 origem: 'regex',
-                tipo_dado: $regex[0]['tipo_dado'] ?? null,
+                tipo_dado: $regex['tipo'] ?? null,
                 confianca: 0.9,
                 pedido_id: $pedido_id,
                 evidencias: $regex

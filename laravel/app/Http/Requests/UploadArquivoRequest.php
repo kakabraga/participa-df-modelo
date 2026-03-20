@@ -22,7 +22,7 @@ class UploadArquivoRequest extends FormRequest
         return [
             'arquivo' => [
                 'file',
-                'max:' . self::MAX_FILE_SIZE,, // 50MB
+                'max:' . self::MAX_FILE_SIZE, // 50MB
                 'mimetypes:' . implode(',', $this->tiposPermitidos())
             ],
         ];
