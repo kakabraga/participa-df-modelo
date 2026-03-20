@@ -12,9 +12,11 @@ def main():
 
         if args.file:
             result = handler.handle(args.file)
-        if args.text:
+
+        elif args.text:
             result = handler.handle(args.text)
-        
+
+        else:
             raise ValueError("Informe --file ou --text")
 
         imprimir_resultado(result)
@@ -24,10 +26,11 @@ def main():
         sys.exit(1)
 
 
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Processador multimodal")
 
-    parser.add_argument("--type", choices=["image", "texto", 'audio'])
+    parser.add_argument("--type", choices=["image", "text", 'audio'])
     parser.add_argument("--file")
     parser.add_argument("--text")
     parser.add_argument("--pedido_id")
