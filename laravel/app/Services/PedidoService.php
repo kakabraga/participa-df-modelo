@@ -37,15 +37,42 @@ class PedidoService
     public function analisarTextoArquivo(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
     {
         $pedido = $this->criarPedido($entrada);
-        $decisao = $this->executarAnaliseBase($entrada, $pedido->id);
 
-        if ($decisao->resultado === 'Limpo') {
-            $decisao = $this->analiseMidiaService->analisarArquivo($entrada->arquivo, $pedido->id);
-        }
+        $decisao = $this->executarFluxoAnalise(
+            $entrada,
+            $pedido->id,
+            fn($entrada, $pedidoId) => $this->analiseMidiaService->analisarTexto($entrada, $pedidoId)
+        );
+        return $this->resolveCriacao($decisao);
+    }
+
+    public function analisarTexto(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
+    {
+        $pedido = $this->pedidoRepository->criarPedido($entrada);
+
+        $decisao = $this->executarFluxoAnalise(
+            $entrada,
+            $pedido->id,
+            fn($entrada, $pedidoId) => $this->analiseMidiaService->analisarTexto($entrada, $pedidoId)
+        );
 
         return $this->resolveCriacao($decisao);
     }
 
+    private function executarFluxoAnalise(
+        EntradaPedidoDTO $entrada,
+        int $pedidoId,
+        callable $acaoSeLimpo
+    ): DecisaoPedidoDTO {
+
+        $decisao = $this->executarAnaliseBase($entrada, $pedidoId);
+
+        if ($decisao->resultado === 'Limpo') {
+            return $acaoSeLimpo($entrada, $pedidoId);
+        }
+
+        return $decisao;
+    }
     private function executarAnaliseBase(EntradaPedidoDTO $entrada, int $pedido_id): DecisaoPedidoDTO
     {
         $detecoes_regex = $this->regexService->detectarRegex($entrada->texto, $pedido_id);
@@ -56,17 +83,8 @@ class PedidoService
         }
         return $this->classificadorService->decide($detecoes_regex, $detecoes_contexto, $pedido_id);
     }
-    public function analisarTexto(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
-    {
-        $pedido = $this->pedidoRepository->criarPedido($entrada);
-        $decisao = $this->executarAnaliseBase($entrada, $pedido->id);
-        if ($decisao->resultado == 'Limpo') {
-            $decisao = $this->analiseMidiaService->analisarTexto($entrada, $pedido->id);
-        }
 
-        return $this->resolveCriacao($decisao);
 
-    }
     public function analisarAudioArquivo(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
     {
         $pedido = $this->pedidoRepository->criarPedido($entrada);
