@@ -3,4 +3,4 @@ class AudioHandler:
         from app.pipelines.audio_pipeline import AudioPipeline
 
         pipeline = AudioPipeline()
-        return pipeline.processarArquivo(file_path)
+        return pipeline.processar(file_path)

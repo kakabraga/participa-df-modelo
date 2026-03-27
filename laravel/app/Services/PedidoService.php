@@ -36,7 +36,7 @@ class PedidoService
 
     public function analisarTextoArquivo(EntradaPedidoDTO $entrada): PersistenciaDecisaoDTO
     {
-        $pedido = $this->criarPedido($entrada);
+        $pedido = $this->pedidoRepository->criarPedido($entrada);
 
         $decisao = $this->executarFluxoAnalise(
             $entrada,
@@ -89,7 +89,6 @@ class PedidoService
     {
         $pedido = $this->pedidoRepository->criarPedido($entrada);
         $decisao = $this->analiseMidiaService->analisarAudio($entrada, $pedido->id);
-
         return $this->resolveCriacao($decisao);
     }
 

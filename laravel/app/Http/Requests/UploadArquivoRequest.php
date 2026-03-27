@@ -28,9 +28,9 @@ class UploadArquivoRequest extends FormRequest
         ];
     }
 
-    private function tiposPermitidos(): array
+    public function tiposPermitidos(): array
     {
-        return array_merge($this->tiposImage(), $this->tiposTexto(), $this->tiposVideo());
+        return array_merge($this->tiposImage(), $this->tiposTexto(), $this->tiposVideo(), $this->tiposAudio());
     }
     private function tiposImage(): array
     {
@@ -56,4 +56,20 @@ class UploadArquivoRequest extends FormRequest
             'text/plain'
         ];
     }
+    private function tiposAudio(): array
+    {
+        return [
+            // áudios comuns
+            'audio/mpeg',      // .mp3
+            'audio/wav',       // .wav
+            'audio/ogg',       // .ogg
+            'audio/oga',       // .oga
+            'audio/webm',      // .webm (áudio)
+            'audio/aac',       // .aac
+            'audio/flac',      // .flac
+            'audio/x-m4a',     // .m4a (muito comum em mobile)
+            'audio/mp4',       // .m4a (variação MIME)
+        ];
+    }
+
 }

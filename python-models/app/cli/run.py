@@ -9,12 +9,15 @@ def main():
     try:
         args = parse_args()
         handler = resolve_handler(args.type)
-
+        print(handler)
         if args.file:
             result = handler.handle(args.file)
 
         elif args.text:
             result = handler.handle(args.text)
+
+        elif args.audio:
+            result = handler.handle(args.audio)
 
         else:
             raise ValueError("Informe --file ou --text")
@@ -42,6 +45,8 @@ def parse_args():
             args.type = "text"
         elif args.file:
             args.type = "image"
+        elif args.audio:
+            args.type = "audio"
         else:
             raise ValueError("Informe --text ou --file")
 
@@ -58,8 +63,8 @@ def resolve_handler(tipo: str):
         return TextoHandler()
     
     if tipo == "audio":
-        from app.inputs.texto_handler import TextoHandler
-        return TextoHandler()
+        from app.inputs.audio_handler import AudioHandler
+        return AudioHandler()
     
     raise ValueError(f"Tipo não suportado: {tipo}")
 

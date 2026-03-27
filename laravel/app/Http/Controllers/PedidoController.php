@@ -5,24 +5,24 @@ namespace App\Http\Controllers;
 use App\Http\Requests\UploadArquivoRequest;
 use App\Services\PedidoService;
 use App\Resolvers\EntradaPedidoResolver;
-
 class PedidoController extends Controller
 {
     public function __construct(
         private PedidoService $pedidoService,
-        private EntradaPedidoResolver $entradaResolver
+        private EntradaPedidoResolver $entradaResolver,
+        private UploadArquivoRequest $uploadArquivoRequest
     ) {
     }
 
     public function index()
     {
-        $accept = ['image/jpg', 'image/jpeg'];
-        return view('site.index', ['accept' => $accept]);
+        return view('site.index', ['accept' => $this->uploadArquivoRequest->tiposPermitidos()]);
     }
 
     public function storeTexto(UploadArquivoRequest $request)
     {
         $entrada = $this->entradaResolver->resolve($request);
+        
         $pedido = match ($entrada->tipo) {
             'texto' => $this->pedidoService->analisarTexto($entrada),
             'imagem' => $this->pedidoService->analisarTextoArquivo($entrada),

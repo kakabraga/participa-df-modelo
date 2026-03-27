@@ -2,7 +2,6 @@
 
 namespace App\Services;
 use App\Integrations\Python\PythonRunner;
-use App\Services\PedidoService;
 use App\DTO\DecisaoPedidoDTO;
 class AnaliseMidiaService
 {
